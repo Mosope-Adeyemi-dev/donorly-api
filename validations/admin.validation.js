@@ -13,5 +13,6 @@ exports.v_adminLogin = Joi.object({
 })
 
 exports.v_deactivateHospital = Joi.object({
-    hospitalId: Joi.string().required()
+    hospitalId: Joi.string().required(),
+    reportId: Joi.string()
 })

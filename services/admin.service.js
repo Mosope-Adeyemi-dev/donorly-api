@@ -83,7 +83,11 @@ exports.retrieveHospitals = async () => {
 
 exports.retrieveReports = async () => {
   try {
-    const reports = await reportModel.aggregate([
+    const reports = await reportModel.aggregate([{
+      $match: {
+
+      }
+    },
       {
         $lookup: {
           from: "hospitals",
@@ -100,9 +104,12 @@ exports.retrieveReports = async () => {
   }
 }
 
-exports.deactivateHospital = async (id) => {
+exports.deactivateHospital = async (id, reportId) => {
   try {
     const result = await hospitalModel.findByIdAndUpdate(id, { isActive: false }, {new: true})
+
+    if(reportId) await reportModel.findByIdAndUpdate(reportId, { status: "Resolved"})
+    
     return [true, result]
   } catch (error) {
     console.log(error);

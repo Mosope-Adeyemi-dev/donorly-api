@@ -16,6 +16,11 @@ const reportSchema = mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: "Request",
         required: true,
+    },
+    status: {
+        type: String,
+        enum: ["Resolved", "Unresolved"],
+        default: "Unresolved"
     }
 }, { timestamps: true})
 

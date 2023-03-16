@@ -88,7 +88,7 @@ exports.getAllReports = async (req, res) => {
 
 exports.deactivateHospitalAccount = async (req, res) => {
   try {
-    const check = await deactivateHospital(req.body.hospitalId)
+    const check = await deactivateHospital(req.body.hospitalId, req.body.reportId)
 
     if (!check[0]) return responseHandler(res, check[1], 400, false);
 
