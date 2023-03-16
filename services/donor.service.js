@@ -107,6 +107,34 @@ exports.retrieveRequestHistory = async (requestedDonor) => {
   }
 }
 
+exports.retrieveRequest = async (requestedDonor) => {
+  try {
+    const requests = await requestModel.aggregate([
+      {
+        $match: {
+          requestedDonor: new mongoose.Types.ObjectId(requestedDonor),
+          status: "pending"
+        }
+      },
+      {
+        $lookup: {
+          from: "hospitals",
+          localField: "requestingHospital",
+          foreignField: "_id",
+          as: "hospital"
+        }
+      }
+    ])
+
+    if (!requests) return [false, "No records found"]
+
+    return [true, requests]
+  } catch (error) {
+    console.error(error)
+    return [false, translateError(error) || "Failed to retrieve donation requests"];
+  }
+}
+
 exports.updateRequestStatus = async (requestId, status) => {
   try {
     const updatedRequest = await requestModel.findByIdAndUpdate(requestId, { status }, { new: true })

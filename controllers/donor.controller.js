@@ -4,6 +4,7 @@ const {
   setDonorProfile,
   retrieveRequestHistory,
   updateRequestStatus,
+  retrieveRequest,
   newSpamReport,
 } = require("../services/donor.service");
 const { responseHandler } = require("../utils/responseHandler");
@@ -115,6 +116,19 @@ exports.reportSpam = async (req, res) => {
     const { reportedHospital, requestId } = req.body
 
     const check = await newSpamReport(reportedHospital, req.user, requestId)
+
+    if (!check[0]) return responseHandler(res, check[1], 400, false);
+
+    return responseHandler(res, `Spam reported successfully`, 200, true, check[1]);
+  } catch (error) {
+    console.error(error);
+    return responseHandler(res, "An error occurred. Server error", 500, false);
+  }
+}
+
+exports.getPendingRequests =  async (req, res) => {
+  try {
+    const check = await retrieveRequest(req.user)
 
     if (!check[0]) return responseHandler(res, check[1], 400, false);
 

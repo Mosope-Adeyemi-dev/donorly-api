@@ -8,7 +8,7 @@ const { verifyToken } = require('../middlewares/auth.middleware')
 const { validationMiddleware } = require('../middlewares/validation.middleware')
 
 // Controllers
-const { signup, login, profileSetup, requestHistory, updateRequestStatus, reportSpam } = require('../controllers/donor.controller')
+const { signup, login, profileSetup, requestHistory, updateRequestStatus, reportSpam, getPendingRequests } = require('../controllers/donor.controller')
 
 // Routes
 router.post('/auth/donor/signup', validationMiddleware(v_donorSignup) , signup)
@@ -17,5 +17,5 @@ router.put('/donor/profile/setup', verifyToken, profileSetup)
 router.get('/donor/donation/list', verifyToken, requestHistory)
 router.patch('/donor/donation/update', verifyToken, validationMiddleware(v_updateRequest), updateRequestStatus)
 router.post('/donor/donation/report', verifyToken, validationMiddleware(v_reportSpam), reportSpam)
-
+router.get('/donor/donation/pending', verifyToken, getPendingRequests)
 module.exports = router;
