@@ -6,6 +6,7 @@ const verifyPasswordPolicy = require("../utils/passwordPolicy");
 const passwordOperations = require("../utils/password");
 const requestModel = require("../models/request.model");
 const reportModel = require("../models/report.model");
+const mongoose = require("mongoose")
 
 exports.registerDonor = async (body) => {
   try {
@@ -81,7 +82,21 @@ exports.setDonorProfile = async (id, body) => {
 
 exports.retrieveRequestHistory = async (requestedDonor) => {
   try {
-    const requests = await requestModel.find({ requestedDonor })
+    const requests = await requestModel.aggregate([
+      {
+        $match: {
+          requestedDonor: new mongoose.Types.ObjectId(requestedDonor)
+        }
+      },
+      {
+        $lookup: {
+          from: "hospitals",
+          localField: "requestingHospital",
+          foreignField: "_id",
+          as: "hospital"
+        }
+      }
+    ])
 
     if (!requests) return [false, "No records found"]
 
