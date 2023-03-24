@@ -12,7 +12,6 @@ const donorSchema = mongoose.Schema({
     },
     phoneNumber: {
         type: String,
-        unique: true,
     },
     password: {
         type: String,
