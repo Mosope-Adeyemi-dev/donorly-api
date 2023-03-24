@@ -5,6 +5,7 @@ const verifyPasswordPolicy = require("../utils/passwordPolicy");
 const passwordOperations = require("../utils/password");
 const donorModel = require("../models/donor.model");
 const requestModel = require("../models/request.model");
+const mongoose = require("mongoose");
 
 exports.registerHospital = async (body) => {
   try {
@@ -57,7 +58,7 @@ exports.authenticateHospital = async (email, password) => {
           phoneNumber,
           location,
           licenseNumber,
-          createdAt
+          createdAt,
         },
       },
     ];
@@ -69,58 +70,111 @@ exports.authenticateHospital = async (email, password) => {
 
 exports.getAllDonors = async () => {
   try {
-    const donors = await donorModel.find({ profileComplete: true, isActive: true }).select("-password")
+    const donors = await donorModel
+      .find({ profileComplete: true, isActive: true })
+      .select("-password");
 
-    return [true, donors]
+    return [true, donors];
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return [false, translateError(error) || "Unable to retrieve donors"];
   }
-}
+};
 
 exports.requestDonation = async (requestedDonor, requestingHospital) => {
   try {
     const request = await requestModel.create({
       requestedDonor,
       requestingHospital,
-    })
+    });
 
-    if(!request) return [false, "Unable to request donation"]
+    if (!request) return [false, "Unable to request donation"];
 
-    console.log(request)
-    return [true, request]
+    console.log(request);
+    return [true, request];
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return [false, translateError(error) || "Unable to send donation request"];
   }
-}
+};
 
-exports.updateAcceptedRequest =  async (requestId) => {
+exports.updateAcceptedRequest = async (requestId) => {
   try {
-    const request = await requestModel.findById(requestId)
+    const request = await requestModel.findById(requestId);
 
-    if(request.status != "accepted") return [false, "Donation request can not be updated until donor accepts request."]
+    if (request.status != "accepted")
+      return [
+        false,
+        "Donation request can not be updated until donor accepts request.",
+      ];
 
-    const updatedRequest = await requestModel.findByIdAndUpdate(requestId, { status: "completed"})
+    const updatedRequest = await requestModel.findByIdAndUpdate(requestId, {
+      status: "completed",
+    });
 
-    if(!updatedRequest) return [false, "Unable to update donation request"]
+    if (!updatedRequest) return [false, "Unable to update donation request"];
 
-    return [true, updatedRequest]
+    return [true, updatedRequest];
   } catch (error) {
-    console.error(error)
-    return [false, translateError(error) || "Failed to update donation request"];
+    console.error(error);
+    return [
+      false,
+      translateError(error) || "Failed to update donation request",
+    ];
   }
-}
+};
 
 exports.retrieveRequestHistory = async (requestingHospital) => {
   try {
-    const requests = await requestModel.find({ requestingHospital })
+    const requests = await requestModel.aggregate([
+      {
+        $match: {
+          requestingHospital: new mongoose.Types.ObjectId(requestingHospital),
+        },
+      },
+      {
+        $lookup: {
+          from: "hospitals",
+          localField: "requestingHospital",
+          foreignField: "_id",
+          as: "hospital",
+        },
+      },
+      {
+        $lookup: {
+          from: "donors",
+          localField: "requestedDonor",
+          foreignField: "_id",
+          as: "donor",
+        },
+      },
+      {
+        $unwind: "$donor",
+      },
+      {
+        $unwind: "$hospital",
+      },
+      {
+        $project: {
+          _id: 1,
+          requestingHospital: 1,
+          requestedDonor: 1,
+          status: 1,
+          createdAt: 1,
+          "donor.fullname": 1,
+          "donor.location": 1 
+        },
+      },
+    ]);
 
-    if(!requests) return [false, "No records found"]
+    if (!requests) return [false, "No records found"];
 
-    return [true, requests]
+    return [true, requests];
   } catch (error) {
-    console.error(error)
-    return [false, translateError(error) || "Failed to retrieve donation requests"];
+    console.error(error);
+    return [
+      false,
+      translateError(error) || "Failed to retrieve donation requests",
+    ];
   }
-}
+};
