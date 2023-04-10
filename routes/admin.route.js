@@ -17,6 +17,6 @@ router.get('/admin/donors/list', verifyToken, getAllDonors)
 router.get('/admin/hospitals/list', verifyToken, getAllHospitals)
 router.get('/admin/reports/list', verifyToken, getAllReports)
 router.post('/admin/hospital/deactivate', validationMiddleware(v_deactivateHospital) ,verifyToken, deactivateHospitalAccount)
-router.post('/admin/hospital/activate', validationMiddleware(v_activateHospital) ,verifyToken, activateHospital)
+router.post('/admin/hospital/activate', validationMiddleware(v_deactivateHospital),verifyToken, activateHospital)
 
 module.exports = router;
