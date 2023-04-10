@@ -4,6 +4,7 @@ const {
   retrieveDonors,
   retrieveHospitals,
   retrieveReports,
+  reactivateHospital,
   deactivateHospital,
 } = require("../services/admin.service");
 const { responseHandler } = require("../utils/responseHandler");
@@ -93,6 +94,19 @@ exports.deactivateHospitalAccount = async (req, res) => {
     if (!check[0]) return responseHandler(res, check[1], 400, false);
 
     return responseHandler(res, `Account suspended successfully`, 200, true, check[1]);
+  } catch (error) {
+    console.error(error);
+    return responseHandler(res, "An error occurred. Server error", 500, false);
+  }
+}
+
+exports.activateHospital = async (req, res) => {
+  try {
+    const check = await reactivateHospital(req.body.hospitalId)
+
+    if (!check[0]) return responseHandler(res, check[1], 400, false);
+
+    return responseHandler(res, `Account activated successfully`, 200, true, check[1]);
   } catch (error) {
     console.error(error);
     return responseHandler(res, "An error occurred. Server error", 500, false);

@@ -118,6 +118,21 @@ exports.deactivateHospital = async (id, reportId) => {
     return [true, result];
   } catch (error) {
     console.log(error);
-    return [false, translateError(error) || "Unable to retrieve reports"];
+    return [false, translateError(error) || "Unable to activate accounts"];
+  }
+};
+
+exports.reactivateHospital = async (id) => {
+  try {
+    const result = await hospitalModel.findByIdAndUpdate(
+      id,
+      { isActive: true },
+      { new: true }
+    );
+
+    return [true, result];
+  } catch (error) {
+    console.log(error);
+    return [false, translateError(error) || "Unable to activate account"];
   }
 };
