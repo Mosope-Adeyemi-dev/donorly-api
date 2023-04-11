@@ -52,32 +52,12 @@ exports.login = async (req, res) => {
 
 exports.profileSetup = async (req, res) => {
   try {
-    const form = formidable({ multiples: true });
-
-    form.parse(req, async (err, fields, files) => {
-      if (err) {
-        return responseHandler(res, "Error - Upload required photo", 400, false, null)
-      }
-      const { photo } = files
-      if (!photo) return responseHandler(res, "Error - Upload required photo", 400, false, null)
-
-      let photoUrl;
-
-      await cloudinaryUpload(photo.filepath).then((downloadURL) => {
-        photoUrl = downloadURL;
-      })
-        .catch((error) => {
-          console.error(error);
-        });
-
-      fields.photo = photoUrl
-      console.log(fields)
-      const check = await setDonorProfile(req.user, fields)
+      const check = await setDonorProfile(req.user, req.body)
 
       if (!check[0]) return responseHandler(res, check[1], 400, false);
 
       return responseHandler(res, check[1], 200, true);
-    })
+  
   } catch (error) {
     console.error(error);
     return responseHandler(res, "An error occurred. Server error", 500, false);
